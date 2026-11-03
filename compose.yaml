@@ -1,0 +1,20 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3309:3306"
+    environment:
+      MYSQL_DATABASE: lendup_identidad
+      MYSQL_USER: lendup_identidad
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Configurar DB_PASSWORD en .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Configurar MYSQL_ROOT_PASSWORD en .env}
+    volumes:
+      - identity-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+volumes:
+  identity-mysql-data:
