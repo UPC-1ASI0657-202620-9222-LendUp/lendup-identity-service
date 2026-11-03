@@ -57,6 +57,8 @@ La escritura de perfiles y la asignación de rol ESTUDIANTE no confieren privile
 
 ## Seguridad e integración
 
+- [Contrato de integración con el API Gateway (rutas, prioridad, puertos y smoke tests)](docs/api-gateway-integration.md)
+
 Las solicitudes de Identidad utilizan Firebase Admin para validar el token Bearer, incluida su revocación. Catálogo vuelve a validar el mismo token y llama a `GET /api/v1/estudiantes/me` para resolver el UUID. Para la integración local, establecer en Catálogo `IDENTITY_BASE_URL=http://localhost:8081`.
 
 Las tablas `roles`, `usuarios`, `perfiles`, `universidades` y `dominios_universidad` pertenecen exclusivamente a Identidad. No hay acceso directo a tablas de Catálogo. La primera migración SQL es idempotente y crea un registro `schema_migrations`.
