@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException
+  CanActivate, ExecutionContext, Inject, Injectable, Logger, UnauthorizedException
 } from '@nestjs/common';
 import type { Auth } from 'firebase-admin/auth';
 import type { Request } from 'express';
@@ -12,6 +12,8 @@ export interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
+  private readonly logger = new Logger(FirebaseAuthGuard.name);
+
   constructor(@Inject(FIREBASE_AUTH) private readonly auth: Auth) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,7 +32,13 @@ export class FirebaseAuthGuard implements CanActivate {
         emailVerified: decoded.email_verified === true
       };
       return true;
-    } catch {
+    } catch (error: unknown) {
+      // Los errores del SDK incluyen códigos seguros para diagnóstico. No registrar
+      // el token, los claims, la contraseña ni rutas a credenciales privadas.
+      const code = typeof error === 'object' && error !== null &&
+        'code' in error && typeof error.code === 'string'
+        ? error.code : 'unknown-verification-error';
+      this.logger.warn(`No se pudo verificar el token Firebase (código: ${code})`);
       throw new UnauthorizedException('Token Firebase inválido, revocado o expirado');
     }
   }
