@@ -1,0 +1,30 @@
+name: Temporary identity lockfile refresh
+on:
+  push:
+    branches: [chore/aws-deployment-readiness]
+permissions:
+  contents: write
+jobs:
+  refresh-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/aws-deployment-readiness
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate lockfile with npm 10
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Verify clean dependency installation
+        run: npm ci --no-audit --no-fund
+      - name: Commit synchronized lockfile back to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "fix(lockfile): synchronize npm 10 dependency tree"
+            git push origin HEAD:chore/aws-deployment-readiness
+          fi
