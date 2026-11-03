@@ -4,7 +4,7 @@ import {
 import type { Auth } from 'firebase-admin/auth';
 import type { Request } from 'express';
 import { FirebaseIdentity } from '../../domain/identity.model';
-import { FIREBASE_AUTH } from './firebase-auth.provider';
+import { FIREBASE_AUTH } from './firebase-auth.token';
 
 export interface AuthenticatedRequest extends Request {
   firebaseIdentity?: FirebaseIdentity;

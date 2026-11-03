@@ -2,7 +2,7 @@ import { Provider } from '@nestjs/common';
 import { applicationDefault, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
-export const FIREBASE_AUTH = Symbol('FIREBASE_AUTH');
+import { FIREBASE_AUTH } from './firebase-auth.token';
 
 export const FirebaseAuthProvider: Provider = {
   provide: FIREBASE_AUTH,
