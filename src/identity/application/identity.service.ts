@@ -88,8 +88,11 @@ export class IdentityService {
 
   async buscarPerfilPublico(principal: FirebaseIdentity, id: string) {
     const actual = await this.exigirUsuario(principal);
-    if (!principal.emailVerified || actual.estadoVerificacion !== 'VERIFICADO') {
+    if (!principal.emailVerified) {
       throw new ForbiddenException('Se requiere correo institucional verificado');
+    }
+    if (actual.estadoVerificacion !== 'VERIFICADO') {
+      await this.repository.marcarCorreoVerificado(actual.id);
     }
     const usuario = await this.repository.buscarUsuarioPorId(id);
     if (!usuario) throw new NotFoundException('Estudiante no encontrado');
