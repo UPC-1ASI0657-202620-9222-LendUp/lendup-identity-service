@@ -23,7 +23,7 @@ Editar `.env` y establecer dos contraseñas locales distintas para `DB_PASSWORD`
 ```powershell
 docker compose up -d mysql
 docker compose ps
-npm install
+npm ci
 npm run db:migrate
 ```
 
