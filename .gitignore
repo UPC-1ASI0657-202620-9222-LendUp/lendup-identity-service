@@ -147,3 +147,10 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Firebase Admin / secretos locales (no subir al repositorio)
+.firebase-admin/
+.secrets/
+firebase-admin.json
+*service-account*.json
+*.pem
