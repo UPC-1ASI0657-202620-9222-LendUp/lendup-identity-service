@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.env
+.env.*
+!.env.example
+node_modules
+dist
+coverage
+TestResults
+*.log
+.npm
+Dockerfile*
+!Dockerfile
+README.md
+**/*.spec.ts
+**/*.test.ts
