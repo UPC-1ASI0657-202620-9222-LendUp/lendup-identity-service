@@ -2,7 +2,7 @@
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 COPY nest-cli.json tsconfig.json tsconfig.build.json ./
 COPY src/ ./src/
 RUN npm run build
@@ -11,7 +11,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production PORT=8081
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build /app/dist/ ./dist/
 # Terms are loaded from process.cwd()/docs at runtime; migrations stay available.
 COPY docs/terminos-lendup.txt ./docs/terminos-lendup.txt
