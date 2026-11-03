@@ -32,6 +32,13 @@ Esta guía describe los requisitos del contenedor; no crea recursos AWS ni publi
 4. Desplegar la imagen en ECS o EC2 y configurar el balanceador/HTTPS. No exponer directamente MySQL.
 5. Verificar `GET /health`, `GET /api/v1/universidades`, `GET /api/v1/documentos/terminos` y el flujo autenticado registro -> `GET /api/v1/estudiantes/me` con token Firebase real.
 
+## Integración con el API Gateway
+
+- El Gateway debe configurar `IDENTITY_SERVICE_URL` con la dirección privada de Identidad. Nunca agregar `/api/v1` al final de la URL base.
+- Enrutar estudiantes, universidades y términos sin reescribir rutas; conservar prioridad de Reputación para `/api/v1/estudiantes/{id}/reputacion`.
+- El frontend utiliza el Gateway y no el puerto interno de Identidad. CORS de la API de Identidad no sustituye al CORS público del Gateway.
+- [Contrato y pruebas de integración del Gateway](api-gateway-integration.md).
+
 ## Integración con Catálogo
 - Catálogo llama a `GET /api/v1/estudiantes/me` y reenvía el mismo Bearer Firebase.
 - Se debe suministrar a Catálogo `IDENTITY_BASE_URL=https://<dominio-real-de-identidad>/` con certificado válido.
