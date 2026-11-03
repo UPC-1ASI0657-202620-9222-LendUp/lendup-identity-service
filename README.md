@@ -1,6 +1,6 @@
 # lendup-identity-service
 
-Microservicio de **Identidad** de LendUp, implementado con **TypeScript, NestJS, Node.js 22, MySQL y Firebase Admin SDK**.
+Microservicio de **Identidad** de LendUp, implementado con **TypeScript, NestJS, Node.js 22 o superior, MySQL y Firebase Admin SDK**.
 
 ## Estado y alcance
 
@@ -10,7 +10,7 @@ La comprobación de un dominio institucional y del correo Firebase **no equivale
 
 ## Preparación local (Windows PowerShell)
 
-Requisitos: Node.js 22, npm y Docker Desktop.
+Requisitos: Node.js 22 o superior, npm y Docker Desktop.
 
 ```powershell
 git switch develop
@@ -27,11 +27,11 @@ npm install
 npm run db:migrate
 ```
 
-Configurar la **misma cuenta de servicio privada** y el proyecto Firebase ya utilizados por Catálogo, desde una variable de entorno local:
+Configurar el proyecto Firebase y la ruta local a un archivo válido de credenciales Firebase Admin. Cada instalación debe proporcionar su propia configuración fuera del repositorio:
 
 ```powershell
-$env:FIREBASE_PROJECT_ID = "lendup-desarrollo"
-$env:GOOGLE_APPLICATION_CREDENTIALS = "$HOME\lendup-secrets\firebase-admin.json"
+$env:FIREBASE_PROJECT_ID = "<id-del-proyecto-firebase>"
+$env:GOOGLE_APPLICATION_CREDENTIALS = "<ruta-absoluta-al-json-de-servicio>"
 npm run start:dev
 ```
 
