@@ -81,6 +81,14 @@ describe('InternalServiceGuard', () => {
     expect(() => guard.canActivate(context('Bearer ' + PAYMENTS, ['payments', 'evidence']))).toThrow(UnauthorizedException);
   });
 
+  it('restringe la consulta de rol al token exclusivo de Evidencias', () => {
+    expect(guard.canActivate(context('Bearer ' + EVIDENCE, ['evidence']))).toBe(true);
+    for (const token of [RESERVATIONS, PAYMENTS, NOTIFICATIONS]) {
+      expect(() => guard.canActivate(context('Bearer ' + token, ['evidence']))).toThrow(ForbiddenException);
+    }
+    expect(() => guard.canActivate(context(undefined, ['evidence']))).toThrow(UnauthorizedException);
+  });
+
   it('rechaza rutas internas sin declaración de permisos', () => {
     expect(() => guard.canActivate(context('Bearer ' + RESERVATIONS, []))).toThrow(ForbiddenException);
   });

@@ -24,6 +24,9 @@ describe('Contrato interno de Identidad', () => {
     expect(route('elegibilidad')).toEqual({
       path: 'usuarios/:usuarioId/elegibilidad', verb: RequestMethod.GET, callers: ['reservations']
     });
+    expect(route('rol')).toEqual({
+      path: 'usuarios/:usuarioId/rol', verb: RequestMethod.GET, callers: ['evidence']
+    });
     expect(route('correo')).toEqual({
       path: 'usuarios/:usuarioId/correo', verb: RequestMethod.GET, callers: ['notifications']
     });
