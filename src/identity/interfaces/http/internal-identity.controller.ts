@@ -14,10 +14,10 @@ import { AllowInternalServices, InternalServiceGuard } from '../../infrastructur
 @UseGuards(InternalServiceGuard)
 @Controller('internal/v1/identidad')
 export class InternalIdentityController {
-  constructor(private readonly integration: IdentityIntegrationService) {}
+  constructor(private readonly integration: IdentityIntegrationService) { }
 
   @Get('firebase/:uid')
-  @AllowInternalServices('reservations', 'payments', 'notifications', 'evidence')
+  @AllowInternalServices('reservations', 'payments', 'notifications', 'evidence', 'loans')
   resolverUsuario(@Param('uid') uid: string) {
     return this.integration.resolverFirebaseUid(uid);
   }

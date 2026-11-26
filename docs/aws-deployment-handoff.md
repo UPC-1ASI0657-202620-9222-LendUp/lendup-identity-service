@@ -49,6 +49,8 @@ La prueba de CI verifica build/test; la prueba real con Firebase/RDS/HTTPS se re
 
 ## API interna servicio a servicio
 
-Configurar tres tokens de servicio distintos mediante Secrets Manager: `IDENTITY_RESERVATIONS_SERVICE_TOKEN`, `IDENTITY_PAYMENTS_SERVICE_TOKEN` y `IDENTITY_NOTIFICATIONS_SERVICE_TOKEN` (mínimo 32 caracteres aleatorios cada uno). Los secretos nunca deben viajar por la URL ni registrarse. No exponer `/internal/v1/identidad/**` en el API Gateway, balanceador público ni en la red externa. Usar TLS privado, Security Groups y rotación de tokens coordinada con cada consumidor.
+Configurar un token exclusivo por consumidor mediante Secrets Manager (mínimo 32 caracteres aleatorios). Identidad lee `IDENTITY_RESERVATIONS_SERVICE_TOKEN`, `IDENTITY_PAYMENTS_SERVICE_TOKEN`, `IDENTITY_NOTIFICATIONS_SERVICE_TOKEN`, `IDENTITY_EVIDENCE_SERVICE_TOKEN` e `IDENTITY_LOANS_SERVICE_TOKEN` según los servicios habilitados. Los secretos nunca deben viajar por la URL ni registrarse. No exponer `/internal/v1/identidad/**` en el API Gateway, balanceador público ni en la red externa. Usar TLS privado, Security Groups y rotación de tokens coordinada con cada consumidor.
 
 Reservas, Pagos y Notificaciones usan cada uno su `IDENTITY_SERVICE_TOKEN` correspondiente y rutas definidas en [contratos internos](internal-integration-contracts.md). El acceso a teléfono depende de la validación contextual de Reservas (participación y vigencia del préstamo); Identidad verifica la identidad del servicio llamante, no la operación de negocio de Reservas.
+
+Inyectar el mismo secreto de Préstamos como `IDENTITY_LOANS_SERVICE_TOKEN` en Identidad y como `IDENTITY_SERVICE_TOKEN` en Préstamos. Configurar `IDENTITY_SERVICE_BASE_URL` con la URL privada y `IDENTITY_FIREBASE_USER_URI_TEMPLATE=/internal/v1/identidad/firebase/{uid}` en Préstamos. Comprobar resolución 200, token inválido 401 y permisos insuficientes 403.

@@ -9,10 +9,10 @@ Cada servicio consumidor configura `IDENTITY_SERVICE_BASE_URL`, `IDENTITY_SERVIC
 - `IDENTITY_RESERVATIONS_SERVICE_TOKEN` para Reservas: resolución UID, elegibilidad y teléfono.
 - `IDENTITY_PAYMENTS_SERVICE_TOKEN` para Pagos: resolución UID.
 - `IDENTITY_NOTIFICATIONS_SERVICE_TOKEN` para Notificaciones: resolución UID y correo.
-
 - `IDENTITY_EVIDENCE_SERVICE_TOKEN` para Evidencias: resolución UID y consulta del rol persistido.
+- `IDENTITY_LOANS_SERVICE_TOKEN` para Préstamos: exclusivamente resolución UID.
 
-Usar **cuatro valores diferentes, aleatorios, de al menos 32 caracteres**. Se envían como `Authorization: Bearer <TOKEN_DE_SERVICIO>`. No usar un Firebase ID token como credencial de servicio. Un valor ausente, débil o compartido se rechaza. Nunca colocar tokens en GitHub, URL, logs ni frontend.
+Usar **un valor aleatorio y exclusivo de al menos 32 caracteres por consumidor**. Se envía como `Authorization: Bearer <TOKEN_DE_SERVICIO>`. No usar un Firebase ID token como credencial de servicio. Se rechazan las credenciales ausentes, con menos de 32 caracteres o compartidas. Nunca colocar tokens en GitHub, URL, logs ni frontend.
 
 El guard devuelve **401** para credenciales ausentes/invalidas y **403** para una credencial válida sin permiso de esa operación. Las rutas internas devuelven **404** si el UUID/UID no existe y **400** si el UUID tiene un formato inválido. No se exponen correos ni teléfonos en las rutas públicas de otros usuarios.
 
@@ -22,7 +22,7 @@ Todos los ejemplos de UUID son ilustrativos.
 
 | Consumidor | GET interno | Respuesta mínima |
 | --- | --- | --- |
-| Reservas, Pagos, Notificaciones, Evidencias | `/internal/v1/identidad/firebase/{uid}` | `{"usuario_id":"11111111-1111-4111-8111-111111111111"}` |
+| Reservas, Pagos, Notificaciones, Evidencias, Préstamos | `/internal/v1/identidad/firebase/{uid}` | `{"usuario_id":"11111111-1111-4111-8111-111111111111"}` |
 | Evidencias | `/internal/v1/identidad/usuarios/{usuario_id}/rol` | `{"rol":"ADMINISTRADOR"}` o `{"rol":"ESTUDIANTE"}` |
 | Reservas | `/internal/v1/identidad/usuarios/{usuario_id}/elegibilidad` | `{"estado_verificacion":"VERIFICADO","terminos_generales_vigentes_aceptados":true}` |
 | Notificaciones | `/internal/v1/identidad/usuarios/{usuario_id}/correo` | `{"correo_institucional":"estudiante@upc.edu.pe"}` |
@@ -69,6 +69,16 @@ IDENTITY_FIREBASE_USER_URI_TEMPLATE=/internal/v1/identidad/firebase/{uid}
 IDENTITY_USER_EMAIL_URI_TEMPLATE=/internal/v1/identidad/usuarios/{usuario_id}/correo
 ```
 
+### Préstamos
+
+```dotenv
+IDENTITY_SERVICE_BASE_URL=https://identity.internal.example
+IDENTITY_SERVICE_TOKEN=<TOKEN_PRESTAMOS>
+IDENTITY_FIREBASE_USER_URI_TEMPLATE=/internal/v1/identidad/firebase/{uid}
+```
+
+El valor de `IDENTITY_SERVICE_TOKEN` coincide con `IDENTITY_LOANS_SERVICE_TOKEN` de Identidad. Préstamos verifica el Firebase ID token del usuario y envía su propia credencial de servicio para resolver el UID. El contrato interno solo devuelve `usuario_id`. Teléfono, correo, rol y elegibilidad quedan fuera del permiso de Préstamos.
+
 ### Evidencias e Incidencias
 
 ```dotenv
@@ -93,6 +103,8 @@ En desarrollo, utilizar la URL interna local correspondiente al puerto expuesto 
 8. Evidencias resuelve UID con su token exclusivo; consultar correo, contacto o elegibilidad devuelve 403. Token ausente, corto o duplicado devuelve 401.
 
 9. Evidencias consulta el rol de estudiantes y administradores; usuario inexistente devuelve 404, UUID inválido 400, otro token válido devuelve 403 y token ausente o inválido 401.
+
+10. Préstamos resuelve un UID registrado con su token exclusivo (200). La resolución con credencial inválida o con Firebase ID token devuelve 401. Consultar teléfono, correo, rol o elegibilidad con el token de Préstamos devuelve 403.
 
 ### Pendientes de otros equipos
 
