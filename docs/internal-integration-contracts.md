@@ -10,7 +10,9 @@ Cada servicio consumidor configura `IDENTITY_SERVICE_BASE_URL`, `IDENTITY_SERVIC
 - `IDENTITY_PAYMENTS_SERVICE_TOKEN` para Pagos: resolución UID.
 - `IDENTITY_NOTIFICATIONS_SERVICE_TOKEN` para Notificaciones: resolución UID y correo.
 
-Usar **tres valores diferentes, aleatorios, de al menos 32 caracteres**. Se envían como `Authorization: Bearer <TOKEN_DE_SERVICIO>`. No usar un Firebase ID token como credencial de servicio. Un valor ausente, débil o compartido se rechaza. Nunca colocar tokens en GitHub, URL, logs ni frontend.
+- `IDENTITY_EVIDENCE_SERVICE_TOKEN` para Evidencias: únicamente resolución UID.
+
+Usar **cuatro valores diferentes, aleatorios, de al menos 32 caracteres**. Se envían como `Authorization: Bearer <TOKEN_DE_SERVICIO>`. No usar un Firebase ID token como credencial de servicio. Un valor ausente, débil o compartido se rechaza. Nunca colocar tokens en GitHub, URL, logs ni frontend.
 
 El guard devuelve **401** para credenciales ausentes/invalidas y **403** para una credencial válida sin permiso de esa operación. Las rutas internas devuelven **404** si el UUID/UID no existe y **400** si el UUID tiene un formato inválido. No se exponen correos ni teléfonos en las rutas públicas de otros usuarios.
 
@@ -20,7 +22,7 @@ Todos los ejemplos de UUID son ilustrativos.
 
 | Consumidor | GET interno | Respuesta mínima |
 | --- | --- | --- |
-| Reservas, Pagos, Notificaciones | `/internal/v1/identidad/firebase/{uid}` | `{"usuario_id":"11111111-1111-4111-8111-111111111111"}` |
+| Reservas, Pagos, Notificaciones, Evidencias | `/internal/v1/identidad/firebase/{uid}` | `{"usuario_id":"11111111-1111-4111-8111-111111111111"}` |
 | Reservas | `/internal/v1/identidad/usuarios/{usuario_id}/elegibilidad` | `{"estado_verificacion":"VERIFICADO","terminos_generales_vigentes_aceptados":true}` |
 | Notificaciones | `/internal/v1/identidad/usuarios/{usuario_id}/correo` | `{"correo_institucional":"estudiante@upc.edu.pe"}` |
 | Reservas | `/internal/v1/identidad/usuarios/{usuario_id}/contacto?reserva_id={reserva_id}` | `{"telefono":"999888777"}` |
@@ -66,6 +68,15 @@ IDENTITY_FIREBASE_USER_URI_TEMPLATE=/internal/v1/identidad/firebase/{uid}
 IDENTITY_USER_EMAIL_URI_TEMPLATE=/internal/v1/identidad/usuarios/{usuario_id}/correo
 ```
 
+### Evidencias e Incidencias
+
+```dotenv
+IDENTITY_SERVICE_URL=https://identity.internal.example
+IDENTITY_SERVICE_TOKEN=<TOKEN_EVIDENCIAS>
+```
+
+El token debe coincidir con IDENTITY_EVIDENCE_SERVICE_TOKEN de Identidad. Evidencias usa exclusivamente GET /internal/v1/identidad/firebase/{uid}, después de verificar el Firebase ID token del usuario. No tiene permiso de consultar correo, teléfono o elegibilidad. El contrato de rol administrativo queda pendiente.
+
 En desarrollo, utilizar la URL interna local correspondiente al puerto expuesto (por ejemplo, `http://host.docker.internal:8085`) y mantener el Gateway sin ruta `/internal/**`. En AWS utilizar HTTPS interno y servicios autorizados únicamente.
 
 ## Pruebas mínimas de integración
@@ -77,6 +88,8 @@ En desarrollo, utilizar la URL interna local correspondiente al puerto expuesto 
 5. Notificaciones obtiene el correo correcto por UUID con su token; otro token recibe 403.
 6. Reservas consulta teléfono solo *después* de comprobar participantes y vigencia en su servicio. Peticiones con `reserva_id` ausente/no UUID → 400; usuario sin perfil → 404.
 7. Despliegue real: comprobar que `/internal/**` no es accesible desde internet ni a través del API Gateway.
+
+8. Evidencias resuelve UID con su token exclusivo; consultar correo, contacto o elegibilidad devuelve 403. Token ausente, corto o duplicado devuelve 401.
 
 ### Pendientes de otros equipos
 
