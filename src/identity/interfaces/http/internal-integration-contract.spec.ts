@@ -19,7 +19,7 @@ describe('Contrato interno de Identidad', () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, InternalIdentityController)).toContain(InternalServiceGuard);
     expect(route('resolverUsuario')).toEqual({
       path: 'firebase/:uid', verb: RequestMethod.GET,
-      callers: ['reservations', 'payments', 'notifications', 'evidence']
+      callers: ['reservations', 'payments', 'notifications', 'evidence', 'loans']
     });
     expect(route('elegibilidad')).toEqual({
       path: 'usuarios/:usuarioId/elegibilidad', verb: RequestMethod.GET, callers: ['reservations']

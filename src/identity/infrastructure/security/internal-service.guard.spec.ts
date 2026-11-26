@@ -7,11 +7,13 @@ const RESERVATIONS = 'r'.repeat(48);
 const PAYMENTS = 'p'.repeat(48);
 const NOTIFICATIONS = 'n'.repeat(48);
 const EVIDENCE = 'e'.repeat(48);
+const LOANS = 'l'.repeat(48);
 const before = {
   reservations: process.env.IDENTITY_RESERVATIONS_SERVICE_TOKEN,
   payments: process.env.IDENTITY_PAYMENTS_SERVICE_TOKEN,
   notifications: process.env.IDENTITY_NOTIFICATIONS_SERVICE_TOKEN,
-  evidence: process.env.IDENTITY_EVIDENCE_SERVICE_TOKEN
+  evidence: process.env.IDENTITY_EVIDENCE_SERVICE_TOKEN,
+  loans: process.env.IDENTITY_LOANS_SERVICE_TOKEN
 };
 
 function context(header: string | undefined, allowed: string[]): ExecutionContext {
@@ -31,13 +33,15 @@ describe('InternalServiceGuard', () => {
     process.env.IDENTITY_PAYMENTS_SERVICE_TOKEN = PAYMENTS;
     process.env.IDENTITY_NOTIFICATIONS_SERVICE_TOKEN = NOTIFICATIONS;
     process.env.IDENTITY_EVIDENCE_SERVICE_TOKEN = EVIDENCE;
+    process.env.IDENTITY_LOANS_SERVICE_TOKEN = LOANS;
   });
   afterAll(() => {
     for (const [key, value] of Object.entries(before)) {
       const name = key === 'reservations' ? 'IDENTITY_RESERVATIONS_SERVICE_TOKEN'
         : key === 'payments' ? 'IDENTITY_PAYMENTS_SERVICE_TOKEN'
           : key === 'notifications' ? 'IDENTITY_NOTIFICATIONS_SERVICE_TOKEN'
-            : 'IDENTITY_EVIDENCE_SERVICE_TOKEN';
+            : key === 'evidence' ? 'IDENTITY_EVIDENCE_SERVICE_TOKEN'
+              : 'IDENTITY_LOANS_SERVICE_TOKEN';
       if (value === undefined) delete process.env[name];
       else process.env[name] = value;
     }
@@ -91,5 +95,35 @@ describe('InternalServiceGuard', () => {
 
   it('rechaza rutas internas sin declaración de permisos', () => {
     expect(() => guard.canActivate(context('Bearer ' + RESERVATIONS, []))).toThrow(ForbiddenException);
+  });
+
+  it('permite a Préstamos resolver UID con su credencial válida', () => {
+    expect(guard.canActivate(context('Bearer ' + LOANS, ['reservations', 'payments', 'notifications', 'evidence', 'loans']))).toBe(true);
+  });
+
+  it('deniega a Préstamos acceso a operaciones de Reservas, Notificaciones y Evidencias', () => {
+    for (const callers of [['reservations'], ['notifications'], ['evidence']]) {
+      expect(() => guard.canActivate(context('Bearer ' + LOANS, callers))).toThrow(ForbiddenException);
+    }
+  });
+
+  it('rechaza la consulta de Préstamos sin encabezado de autorización', () => {
+    expect(() => guard.canActivate(context(undefined, ['loans']))).toThrow(UnauthorizedException);
+  });
+
+  it('rechaza una credencial incorrecta de Préstamos', () => {
+    expect(() => guard.canActivate(context('Bearer ' + 'x'.repeat(48), ['loans']))).toThrow(UnauthorizedException);
+  });
+
+  it('rechaza la credencial de Préstamos si no está configurada o es demasiado corta', () => {
+    delete process.env.IDENTITY_LOANS_SERVICE_TOKEN;
+    expect(() => guard.canActivate(context('Bearer ' + LOANS, ['loans']))).toThrow(UnauthorizedException);
+    process.env.IDENTITY_LOANS_SERVICE_TOKEN = 'l'.repeat(31);
+    expect(() => guard.canActivate(context('Bearer ' + 'l'.repeat(31), ['loans']))).toThrow(UnauthorizedException);
+  });
+
+  it('rechaza una credencial compartida por Préstamos y otro servicio', () => {
+    process.env.IDENTITY_LOANS_SERVICE_TOKEN = PAYMENTS;
+    expect(() => guard.canActivate(context('Bearer ' + PAYMENTS, ['payments', 'loans']))).toThrow(UnauthorizedException);
   });
 });
