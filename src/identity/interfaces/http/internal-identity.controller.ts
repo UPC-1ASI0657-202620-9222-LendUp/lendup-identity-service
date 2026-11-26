@@ -17,7 +17,7 @@ export class InternalIdentityController {
   constructor(private readonly integration: IdentityIntegrationService) {}
 
   @Get('firebase/:uid')
-  @AllowInternalServices('reservations', 'payments', 'notifications')
+  @AllowInternalServices('reservations', 'payments', 'notifications', 'evidence')
   resolverUsuario(@Param('uid') uid: string) {
     return this.integration.resolverFirebaseUid(uid);
   }

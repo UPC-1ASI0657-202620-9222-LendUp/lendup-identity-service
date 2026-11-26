@@ -5,7 +5,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
-export type InternalService = 'reservations' | 'payments' | 'notifications';
+export type InternalService = 'reservations' | 'payments' | 'notifications' | 'evidence';
 export const INTERNAL_SERVICES_KEY = 'identity:allowed-internal-services';
 export const AllowInternalServices = (...services: InternalService[]) =>
   SetMetadata(INTERNAL_SERVICES_KEY, services);
@@ -13,7 +13,8 @@ export const AllowInternalServices = (...services: InternalService[]) =>
 const credentials: ReadonlyArray<readonly [InternalService, string]> = [
   ['reservations', 'IDENTITY_RESERVATIONS_SERVICE_TOKEN'],
   ['payments', 'IDENTITY_PAYMENTS_SERVICE_TOKEN'],
-  ['notifications', 'IDENTITY_NOTIFICATIONS_SERVICE_TOKEN']
+  ['notifications', 'IDENTITY_NOTIFICATIONS_SERVICE_TOKEN'],
+  ['evidence', 'IDENTITY_EVIDENCE_SERVICE_TOKEN']
 ];
 
 function equalSecret(actual: string, expected: string): boolean {
