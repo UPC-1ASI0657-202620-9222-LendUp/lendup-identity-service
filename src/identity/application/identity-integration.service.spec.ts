@@ -81,6 +81,20 @@ describe('IdentityIntegrationService', () => {
     expect((await service.consultarElegibilidad(usuario.id)).estado_verificacion).toBe('PENDIENTE');
   });
 
+  it('entrega únicamente el rol persistido del estudiante o administrador', async () => {
+    const { repository, service } = setup();
+    await expect(service.consultarRol(usuario.id)).resolves.toEqual({ rol: 'ESTUDIANTE' });
+    repository.buscarUsuarioPorId.mockResolvedValue({ ...usuario, rol: 'ADMINISTRADOR' });
+    await expect(service.consultarRol(usuario.id)).resolves.toEqual({ rol: 'ADMINISTRADOR' });
+    expect(repository.buscarUsuarioPorId).toHaveBeenCalledWith(usuario.id);
+  });
+
+  it('rechaza la consulta de rol de un usuario inexistente', async () => {
+    const { repository, service } = setup();
+    repository.buscarUsuarioPorId.mockResolvedValue(null);
+    await expect(service.consultarRol(usuario.id)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
   it('entrega solo el correo normalizado a Notificaciones', async () => {
     const { service } = setup();
     await expect(service.consultarCorreo(usuario.id)).resolves.toEqual({ correo_institucional: 'estudiante@upc.edu.pe' });

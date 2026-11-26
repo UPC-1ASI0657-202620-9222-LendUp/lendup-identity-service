@@ -31,6 +31,11 @@ export class IdentityIntegrationService {
     };
   }
 
+  async consultarRol(usuarioId: string) {
+    const usuario = await this.exigirUsuario(usuarioId);
+    return { rol: usuario.rol };
+  }
+
   async consultarCorreo(usuarioId: string) {
     const usuario = await this.exigirUsuario(usuarioId);
     return { correo_institucional: normalizarCorreo(usuario.correoInstitucional) };

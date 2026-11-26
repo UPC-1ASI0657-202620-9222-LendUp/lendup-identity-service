@@ -28,6 +28,12 @@ export class InternalIdentityController {
     return this.integration.consultarElegibilidad(usuarioId);
   }
 
+  @Get('usuarios/:usuarioId/rol')
+  @AllowInternalServices('evidence')
+  rol(@Param('usuarioId', new ParseUUIDPipe()) usuarioId: string) {
+    return this.integration.consultarRol(usuarioId);
+  }
+
   @Get('usuarios/:usuarioId/correo')
   @AllowInternalServices('notifications')
   correo(@Param('usuarioId', new ParseUUIDPipe()) usuarioId: string) {
